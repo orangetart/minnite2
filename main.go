@@ -8,6 +8,7 @@ import (
 
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer/stateful"
+	"github.com/alecthomas/repr"
 	. "github.com/arata-nvm/minnite/minnite"
 )
 
@@ -29,6 +30,7 @@ func repl() {
 
 func exec(s string, ctx *Context) Value {
 	program := parse(s)
+	repr.Println(program)
 	return program.Eval(ctx)
 }
 

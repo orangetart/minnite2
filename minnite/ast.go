@@ -6,6 +6,7 @@ type Program struct {
 
 type Statement struct {
 	Let   *LetStatement   `( @@ `
+	If    *IfStatement    `| @@ `
 	Print *PrintStatement `| @@ ) ";"`
 }
 
@@ -16,6 +17,12 @@ type LetStatement struct {
 
 type PrintStatement struct {
 	Value *Expression `"print" @@`
+}
+
+type IfStatement struct {
+	Cond *Expression `"if" @@`
+	Con  *Statement  `@@`
+	Alt  *Statement  `@@`
 }
 
 type Expression struct {
@@ -34,7 +41,7 @@ type AdditionExpression struct {
 }
 
 type OpAdditionExpression struct {
-	Op  *string                   `@"+"`
+	Op  *string                   `@("+" | "-")`
 	Mul *MultiplicationExpression `  @@`
 }
 
@@ -44,7 +51,7 @@ type MultiplicationExpression struct {
 }
 
 type OpMultiplicationExpression struct {
-	Op   *string         `@"*"`
+	Op   *string         `@("*" | "/")`
 	Term *TermExpression `@@`
 }
 

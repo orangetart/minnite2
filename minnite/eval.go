@@ -18,6 +18,8 @@ func (s *Statement) Eval(ctx *Context) Value {
 		return s.Let.Eval(ctx)
 	case s.Print != nil:
 		return s.Print.Eval(ctx)
+	case s.If != nil:
+		return s.If.Eval(ctx)
 	}
 
 	panic("unreachable")
@@ -30,6 +32,18 @@ func (s *LetStatement) Eval(ctx *Context) Value {
 
 func (s *PrintStatement) Eval(ctx *Context) Value {
 	fmt.Println(s.Value.Eval(ctx))
+	return NewVoid()
+}
+
+func (s *IfStatement) Eval(ctx *Context) Value {
+	cond := s.Cond.Eval(ctx).(Boolean)
+
+	if cond {
+		s.Con.Eval(ctx)
+	} else {
+		s.Alt.Eval(ctx)
+	}
+
 	return NewVoid()
 }
 
@@ -65,6 +79,9 @@ func (e *AdditionExpression) Eval(ctx *Context) Value {
 		switch op {
 		case "+":
 			lhs += rhs
+		case "-":
+			lhs -= rhs
+
 		}
 	}
 
@@ -83,6 +100,8 @@ func (e *MultiplicationExpression) Eval(ctx *Context) Value {
 		switch op {
 		case "*":
 			lhs *= rhs
+		case "/":
+			lhs /= rhs
 		}
 	}
 
