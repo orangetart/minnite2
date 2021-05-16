@@ -20,8 +20,10 @@ func (s *Statement) Eval(ctx *Context) Value {
 		return s.Print.Eval(ctx)
 	case s.If != nil:
 		return s.If.Eval(ctx)
+  case s.For != nil:
+    return s.For.Eval(ctx)
 	}
-
+  
 	panic("unreachable")
 }
 
@@ -47,6 +49,18 @@ func (s *IfStatement) Eval(ctx *Context) Value {
 	return NewVoid()
 }
 
+func (s *ForStatement) Eval(ctx *Context) Value {
+	crit := s.Crit.Eval(ctx).(Boolean)
+
+for s.Init.Eval(ctx);crit;s.Chan.Eval(ctx){
+  s.Proc.Eval(ctx)
+  if crit==false{
+break
+  }
+}
+	return NewVoid()
+}
+
 func (e *Expression) Eval(ctx *Context) Value {
 	return e.Expression.Eval(ctx)
 }
@@ -62,6 +76,16 @@ func (e *ComparisonExpression) Eval(ctx *Context) Value {
 	switch *e.Op {
 	case "==":
 		result = lhs == rhs
+  case "!=":
+    result =lhs != rhs
+  case "<":
+		result = lhs < rhs
+	case "<=":
+		result = lhs <= rhs
+	case ">":
+		result = lhs > rhs
+	case ">=":
+		result = lhs >= rhs
 	}
 
 	return NewBoolean(result)
@@ -102,6 +126,8 @@ func (e *MultiplicationExpression) Eval(ctx *Context) Value {
 			lhs *= rhs
 		case "/":
 			lhs /= rhs
+    case "%":
+			lhs %= rhs
 		}
 	}
 
@@ -114,6 +140,8 @@ func (t *TermExpression) Eval(ctx *Context) Value {
 		return ctx.FindVariable(*t.Variable)
 	case t.Number != nil:
 		return NewInteger(*t.Number)
+  case t.Expression != nil:
+		return t.Expression.Eval(ctx)
 	}
 
 	panic("unreachable")
