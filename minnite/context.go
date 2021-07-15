@@ -45,7 +45,7 @@ func (ctx *Context) FindVariable(name string) Value {
 
 	if ctx.parent == nil {
 		panic(fmt.Sprintf("変数'%s'は存在しません", name))
-	}
+  }
 
 	return ctx.parent.FindVariable(name)
 }

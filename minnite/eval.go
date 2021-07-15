@@ -1,9 +1,11 @@
-package minnite
+ package minnite
 
 import "fmt"
 
+var cn Value
+
 func (p *Program) Eval(ctx *Context) Value {
-	result := NewVoid()
+result := NewVoid()
 
 	for _, stmt := range p.Statements {
 		result = stmt.Eval(ctx)
@@ -22,9 +24,31 @@ func (s *Statement) Eval(ctx *Context) Value {
 		return s.If.Eval(ctx)
   case s.For != nil:
     return s.For.Eval(ctx)
+  case s.Return != nil:
+		return s.Return.Eval(ctx)
+  case s.Switch != nil:
+		return s.Switch.Eval(ctx)
+  case s.Case != nil:
+		return s.Case.Eval(ctx)
+  case s.Summon != nil:
+		return s.Summon.Eval(ctx)
 	}
   
 	panic("unreachable")
+}
+
+func (s *BlockStatement) Eval(ctx *Context) Value {
+	result := NewVoid()
+
+	for _, stmt := range s.Body {
+		result = stmt.Eval(ctx)
+
+		if stmt.Return != nil {
+			break
+		}
+	}
+
+	return result
 }
 
 func (s *LetStatement) Eval(ctx *Context) Value {
@@ -34,7 +58,7 @@ func (s *LetStatement) Eval(ctx *Context) Value {
 
 func (s *PrintStatement) Eval(ctx *Context) Value {
 	fmt.Println(s.Value.Eval(ctx))
-	return NewVoid()
+  return NewVoid()
 }
 
 func (s *IfStatement) Eval(ctx *Context) Value {
@@ -49,6 +73,18 @@ func (s *IfStatement) Eval(ctx *Context) Value {
 	return NewVoid()
 }
 
+func (s *SwitchStatement) Eval(ctx *Context) Value {
+  cn=s.Va.Eval(ctx)
+	return NewVoid()
+}
+
+func (s *CaseStatement) Eval(ctx *Context) Value {
+  if s.CN.Eval(ctx)==cn{
+    s.Num.Eval(ctx)
+  }
+	return NewVoid()
+}
+
 func (s *ForStatement) Eval(ctx *Context) Value {
 	crit := s.Crit.Eval(ctx).(Boolean)
 
@@ -59,6 +95,15 @@ break
   }
 }
 	return NewVoid()
+}
+
+func (s *SummonStatement) Eval(ctx *Context) Value {
+  fmt.Println(s.Summon.Eval(ctx))
+	return NewVoid()
+}
+
+func (s *ReturnStatement) Eval(ctx *Context) Value {
+	return s.Value.Eval(ctx)
 }
 
 func (e *Expression) Eval(ctx *Context) Value {
@@ -142,7 +187,22 @@ func (t *TermExpression) Eval(ctx *Context) Value {
 		return NewInteger(*t.Number)
   case t.Expression != nil:
 		return t.Expression.Eval(ctx)
+  case t.Function != nil:
+		return t.Function.Eval(ctx)
+  case t.Call != nil:
+		return t.Call.Eval(ctx)
+    
+    
 	}
 
 	panic("unreachable")
+}
+
+func (f *FunctionExpression) Eval(ctx *Context) Value {
+	return NewFunction(f.Body)
+}
+
+func (c *CallExpression) Eval(ctx *Context) Value {
+	f := ctx.FindVariable(*c.Name).(*Function)
+	return f.Body.Eval(ctx)
 }

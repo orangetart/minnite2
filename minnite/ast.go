@@ -8,7 +8,15 @@ type Statement struct {
 	Let   *LetStatement   `( @@ `
 	If    *IfStatement    `| @@ `
   For   *ForStatement   `| @@ `
-	Print *PrintStatement `| @@ ) ";"`
+  Switch*SwitchStatement `| @@ `
+  Case*CaseStatement     `| @@ `
+  Return*ReturnStatement `| @@ `
+  Summon *SummonStatement`| @@ `
+  Print *PrintStatement  `| @@ ) ";"`
+}
+
+type BlockStatement struct {
+	Body []*Statement `"{" @@* "}"`
 }
 
 type LetStatement struct {
@@ -17,7 +25,7 @@ type LetStatement struct {
 }
 
 type PrintStatement struct {
-	Value *Expression `"print" @@`
+	Value *Expression `"print"@@`
 }
 
 type IfStatement struct {
@@ -26,11 +34,28 @@ type IfStatement struct {
 	Alt  *Statement  `@@`
 }
 
+type SwitchStatement struct {
+	Va  *Expression `"switch" @@`
+}
+
+type CaseStatement struct {
+	CN   *Expression `"case" @@`
+  Num  *Statement  `@@`
+}
+
 type ForStatement struct {
 	Init *Statement `"for" @@`
 	Crit  *Expression  `@@`
 	Proc  *Statement  `@@`
   Chan  *Statement  `@@`
+}
+
+type SummonStatement struct {
+  Summon *Expression `"call" @@`
+}
+
+type ReturnStatement struct {
+	Value *Expression `"return" @@`
 }
 
 type Expression struct {
@@ -64,7 +89,17 @@ type OpMultiplicationExpression struct {
 }
 
 type TermExpression struct {
-	Variable   *string     `@Ident`
-	Number     *int        `| @Number`
-	Expression *Expression `| ( "(" @@ ")" )`
+	Expression *Expression         `( "(" @@ ")" )`
+	Function   *FunctionExpression `| @@`
+  Call       *CallExpression     `| @@`
+	Variable   *string             `| @Ident`
+	Number     *int                `| @Number`
+}
+
+type FunctionExpression struct {
+	Body *BlockStatement `"func" "(" ")" @@`
+}
+
+type CallExpression struct {
+	Name *string `@Ident "(" ")"`
 }
